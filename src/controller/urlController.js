@@ -50,22 +50,22 @@ const createShortenURL = async function (req, res) {
         }
         if (validURL.isWebUri(longUrl.toString())) {
 
-                const findUrl = await urlModel.findOne({ $or: [{longUrl : longUrl}, {shortUrl : longUrl}] }).select({ _id: 0, createdAt: 0, updatedAt: 0, __v: 0, })
-                if (findUrl) {
-                    return res.status(200).send({ status: true, msg: "Data in db", data: findUrl })
-                }
-                else {
-                    const shortURLId = new ShortUniqueId().stamp(10)
-                    const shortenUrl = req.protocol + "://" + req.headers.host + "/" + shortURLId
-                    const createUrl = await urlModel.create({ longUrl, shortUrl: shortenUrl, urlCode: shortURLId })
+            const findUrl = await urlModel.findOne({ $or: [{ longUrl: longUrl }, { shortUrl: longUrl }] }).select({ _id: 0, createdAt: 0, updatedAt: 0, __v: 0, })
+            if (findUrl) {
+                return res.status(200).send({ status: true, msg: "Data in db", data: findUrl })
+            }
+            else {
+                const shortURLId = new ShortUniqueId().stamp(10)
+                const shortenUrl = req.protocol + "://" + req.headers.host + "/" + shortURLId
+                const createUrl = await urlModel.create({ longUrl, shortUrl: shortenUrl, urlCode: shortURLId })
 
-                    const data = {
-                        urlCode: createUrl.urlCode,
-                        longUrl: createUrl.longUrl,
-                        shortUrl: createUrl.shortUrl
-                    }
-                    return res.status(201).send({ status: true, msg : "Short Url Created Successfully", data: data })
+                const data = {
+                    urlCode: createUrl.urlCode,
+                    longUrl: createUrl.longUrl,
+                    shortUrl: createUrl.shortUrl
                 }
+                return res.status(201).send({ status: true, msg: "Short Url Created Successfully", data: data })
+            }
         }
         else {
             return res.status(400).send({ status: false, message: "invalid URL" })
@@ -92,7 +92,8 @@ const getUrlByUrlCode = async function (req, res) {
         if (findUrlCode) {
             await SET_ASYNC(`${urlCode}`, findUrlCode.longUrl, "EX", 60 * 2)
             return res.status(302).redirect(findUrlCode.longUrl)
-        } else {
+        }
+        else {
             return res.status(404).send({ status: false, message: "no url found" })
         }
     }
